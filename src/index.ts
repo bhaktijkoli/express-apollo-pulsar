@@ -1,13 +1,21 @@
 import express from 'express';
 import { config } from 'dotenv';
+import { ApolloServer } from 'apollo-server-express';
+import typeDefs from './schema';
+import resolvers from './resolvers';
 config()
 
-const app = express();
+async function startServer() {
+    const port = Number(process.env.SERVER_PORT);
+    const server = new ApolloServer({ typeDefs, resolvers });
+    await server.start();
 
-app.get('/', (req, res) => {
-    res.send('Welcome to API!');
-})
+    const app = express();
+    server.applyMiddleware({ app });
 
-app.listen(process.env.SERVER_PORT, () => {
-    console.log(`The application is listening on port ${process.env.SERVER_PORT}!`);
-})
+    await new Promise<void>((resolve: () => void) => app.listen({ port }, resolve));
+    console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`);
+    return { server, app };
+}
+
+startServer();

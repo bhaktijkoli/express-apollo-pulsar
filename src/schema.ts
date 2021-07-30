@@ -19,6 +19,9 @@ const typeDefs = gql`
         users: [User]!
         hello: String!
     }
+    type Mutation {
+        addUser(name: String, email: String): User
+    }
 `;
 
 export default typeDefs

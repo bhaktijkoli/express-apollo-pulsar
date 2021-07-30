@@ -22,6 +22,16 @@ const resolvers = {
         async books(user: User): Promise<Book[]> {
             return await prisma.book.findMany({ where: { userId: user.id } })
         }
+    },
+    Mutation: {
+        async addUser(_: any, args: { name: string, email: string }): Promise<User> {
+            return await prisma.user.create({
+                data: {
+                    name: args.name,
+                    email: args.email
+                }
+            })
+        }
     }
 };
 

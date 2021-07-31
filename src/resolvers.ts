@@ -1,5 +1,7 @@
 import { Book, PrismaClient, User } from "@prisma/client";
+import { PubSub, withFilter } from 'graphql-subscriptions';
 const prisma = new PrismaClient();
+const pubsub = new PubSub();
 
 const resolvers = {
     Query: {
@@ -25,12 +27,26 @@ const resolvers = {
     },
     Mutation: {
         async addUser(_: any, args: { name: string, email: string }): Promise<User> {
-            return await prisma.user.create({
+            const user = await prisma.user.create({
                 data: {
                     name: args.name,
                     email: args.email
                 }
             })
+            pubsub.publish('USER_CREATED', {
+                userCreated: user
+            });
+            return user;
+        }
+    },
+    Subscription: {
+        userCreated: {
+            subscribe: withFilter(
+                () => pubsub.asyncIterator('USER_CREATED'),
+                (payload, variables) => {
+                    return (payload.userCreated.email === variables.email);
+                },
+            )
         }
     }
 };

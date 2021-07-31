@@ -22,6 +22,9 @@ const typeDefs = gql`
     type Mutation {
         addUser(name: String, email: String): User
     }
+    type Subscription {
+        userCreated(email: String): User
+    }
 `;
 
 export default typeDefs
